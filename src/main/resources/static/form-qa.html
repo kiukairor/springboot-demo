@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Rounded border */
+    hr.rounded {
+        border-top: 8px solid #bbb;
+        border-radius: 5px;
+    }
+</style>
+<script>
+    //initialise "global" variables
+    var in1 = 0;
+    var in2 = 0;
+    var in3 = 0;
+    var in4 = 0;
+    var in5 = 0;
+    var in6 = 0;
+    var in7 = 0;
+    var in8 = 0;
+    var in9 = 0;
+    var in10 = 0;
+    var in11 = 0;
+    var in12 = 0;
+    var in13 = 0;
+    var in14 = 0;
+    var in15 = 0;
+    var in16 = 0;
+
+    var output = 0;
+
+    //url that POST request will be sent to
+    var url = "https://localhost:8080/auth";
+    //var url = "https://localhost:8080/validateOTP";
+    //var url = "https://localhost:8080/otp.html";
+
+    //function that is called once the "Add Example Data" button has been clicked - This will fill the input boxes with predefined data
+    function exampleData() {
+        document.getElementById("name").value = "John Actor";
+        document.getElementById("pan").value = "8576395418450674";
+        document.getElementById("cvv").value = "947";
+        document.getElementById("expmon").value = "04";
+        document.getElementById("expyea").value = "23";
+        document.getElementById("amt").value = "450";
+        document.getElementById("merID").value = "ARGOS";
+        document.getElementById("merCC").value = "0635";
+        document.getElementById("str1").value = "43 The Gardens";
+        document.getElementById("str2").value = "West Street";
+        document.getElementById("town").value = "Swindon";
+        document.getElementById("county").value = "Wiltshire";
+        document.getElementById("postcode").value = "SN11BQ";
+        document.getElementById("country").value = "GB";
+        document.getElementById("countrycode").value = "GB";
+
+    }
+
+
+    //function that is called once the submit button has been clicked
+    function submit1() {
+        //get the values from the input boxes
+        in1 = document.getElementById("name").value;
+        in2 = document.getElementById("pan").value;
+        in3 = document.getElementById("cvv").value;
+        in4 = document.getElementById("expmon").value;
+        in5 = document.getElementById("expyea").value;
+        in6 = document.getElementById("amt").value;
+        in7 = document.getElementById("merID").value;
+        in8 = document.getElementById("merCC").value;
+        in9 = document.getElementById("str1").value;
+        in10 = document.getElementById("str2").value;
+        in11 = document.getElementById("town").value;
+        in12 = document.getElementById("county").value;
+        in13 = document.getElementById("postcode").value;
+        in14 = document.getElementById("country").value;
+        in15 = new Date();
+        in16 = document.getElementById("countrycode").value;
+
+        //Input validation check
+        var checkBox = document.getElementById("disableInputValidation");
+        if (checkBox.checked == true) {
+            //if checked then input validation will be skipped - a warning will be displayed to ensure it has not been selected by accident
+            if (confirm("Are you sure you want to send this POST request without input validation? This could lead to unexpected behaviour elsewhere in the program.") == true) {
+                process();
+            } else {
+            }
+        } else {
+            //input validation - check that the inputs meet the requirements
+            if (!(/^[A-Za-z0-9-,\s\.]{1,50}$/.test(in1))) {
+                window.alert("Please follow the correct format for 'Name on Card'");
+            }
+            else if (!(/^[0-9]{16}$/.test(in2))) {
+                window.alert("Please follow the correct format for 'PAN'");
+            }
+            else if (!(/^[0-9]{3}$/.test(in3))) {
+                window.alert("Please follow the correct format for 'CVV'");
+            }
+            else if (!(/^[0-9\.,]+$/.test(in6))) {
+                window.alert("Please follow the correct format for 'Transaction Amount'");
+            }
+            else if (!(/^[A-Za-z0-9]{1,50}$/.test(in7))) {
+                window.alert("Please follow the correct format for 'MerchantID'");
+            }
+            else if (!(/^[0-9]{4}$/.test(in8))) {
+                window.alert("Please follow the correct format for 'Merchant Category Code'");
+            }
+            else if (!(/^.{1,50}$/.test(in9))) {
+                window.alert("Please follow the correct format for 'Street Address Line 1'");
+            }
+            else if (!(/^.{0,50}$/.test(in10))) {
+                window.alert("Please follow the correct format for 'Street Address Line 2'");
+            }
+            else if (!(/^.{1,50}$/.test(in11))) {
+                window.alert("Please follow the correct format for 'Town/City'");
+            }
+            else if (!(/^.{0,50}$/.test(in12))) {
+                window.alert("Please follow the correct format for 'County'");
+            }
+            else if (!(/^[A-Za-z0-9\s]{5,8}$/.test(in13))) {
+                window.alert("Please follow the correct format for 'Post Code'");
+            }
+            else if (!(/^.{1,50}$/.test(in16))) {
+                window.alert("Please follow the correct format for 'Country Code'");
+            }
+            else {
+                if ((/^[0-9]{1,}$/.test(in6))) {
+                    in6 = in6 + '.00';
+                    process();
+                }
+                else if ((/^[0-9]{1,}[\.]$/.test(in6))) {
+                    in6 = in6 + '00';
+                    process();
+                }
+                else if ((/^[0-9]{1,}[\.][0-9]{1}$/.test(in6))) {
+                    in6 = in6 + '0';
+                    process();
+                }
+                else if ((/^[0-9]{1,}[\.][0-9]{2}$/.test(in6))) {
+                    process();
+                }
+                else if ((/^[0-9]{1,}[,]$/.test(in6))) {
+                    in6 = in6.replace(",", ".");
+                    in6 = in6 + '00';
+                    process();
+                }
+                else if ((/^[0-9]{1,}[,][0-9]{1}$/.test(in6))) {
+                    in6 = in6.replace(",", ".");
+                    in6 = in6 + '0';
+                    process();
+                }
+                else if ((/^[0-9]{1,}[,][0-9]{2}$/.test(in6))) {
+                    in6 = in6.replace(",", ".");
+                    process();
+                }
+                else {
+                    window.alert("Please follow the correct format for 'Transaction Amount'- 2 decimal places");
+                }
+            }
+        }
+    }
+
+    //function that is called to process the input data into a JSON format
+    function process() {
+        var preoutput = {
+            name: in1,
+            pan: in2,
+            cvv: in3,
+            expiry: [
+                {
+                    expmon: in4,
+                    expyea: in5
+                }
+            ],
+            amt: in6,
+            merID: in7,
+            merCC: in8,
+            address: [
+                {
+                    str1: in9,
+                    str2: in10,
+                    town: in11,
+                    county: in12,
+                    postcode: in13,
+                    country: in14
+                }
+            ],
+            timestamp: in15,
+            countrycode: in16
+        }
+
+        //turn the JSON object into a string
+
+        //qaqa commented
+        //preoutput = JSON.stringify(preoutput);
+        output = JSON.stringify(preoutput);
+
+
+        console.log("Data to be sent: " + output);
+        postdata();
+    }
+
+    //function that sends a POST request to the API server
+    function postdata() {
+        var postRequest = new XMLHttpRequest();
+        postRequest.open("POST", url, true);
+        postRequest.setRequestHeader("Content-Type", "application/json");
+        postRequest.onreadystatechange = function () {
+            //if successful post, add the response to the webpage
+            if (postRequest.readyState === 4 && postRequest.status === 200) {
+                console.log("QAQA");
+                console.log(postRequest.responseText);
+                //console.log(postRequest.responseXML);
+                document.getElementById("outputconfirmation").innerHTML = "YES";
+                //qaqa Redirect to another html page (same resources folder)
+                document.getElementById("outputdisplay").innerHTML = postRequest.responseText;
+            }
+        };
+        postRequest.send(output);
+        console.log("QAQA");
+        //console.log(postRequest.responseText);
+    }
+
+
+    function fdp() {
+    var val = document.getElementById("otp").value;
+    console.log("FDPFDPFDPFDPFDPFDPFDPFDP  " + val)
+    processOTP(val);
+
+    };
+
+function processOTP(val) {
+    var postRequest = new XMLHttpRequest();
+    postRequest.open("POST", "https://localhost:8080/static/otp.html", true);
+    postRequest.setRequestHeader("Content-Type", "application/json");
+    postRequest.onreadystatechange = function () {
+        if (postRequest.readyState === 4 && postRequest.status === 200) {
+            console.log(postRequest.responseText);
+        }
+    }
+    postRequest.send(val);
+    console.log("done");
+};
+
+
+
+
+
+
+
+</script>
+<title>
+    Input GUI
+</title>
+
+<head>
+    <h1>
+        Security Engineering Authentication Project Input Page
+    </h1>
+</head>
+
+<body>
+    <!--Input options-->
+    <b>INPUT OPTIONS</b>
+    <br />
+    <table>
+        <tr>
+            <td>
+                <input type="button" value="Add example data" onclick="exampleData()">
+            </td>
+            <td>
+                Disable input validation? <input type="checkbox" id="disableInputValidation">
+            </td>
+        </tr>
+    </table>
+
+    <!--Input table - these values will be used to fill the POST request-->
+    <hr class="rounded">
+    <b>INPUT</b>
+    <br />
+    <table class="a">
+        <tr>
+            <td>
+                Name on card
+            </td>
+            <td>
+                <input type="text" placeholder="Enter your name" id="name" style="width:100%" />
+            </td>
+            <td>
+                (1-50 alphanumeric, "-","'" or " " characters)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Card Number (PAN)
+            </td>
+            <td>
+                <input type="text" pattern="[0-9]{16}" placeholder="Enter your card number" id="pan"
+                    style="width:100%" />
+            </td>
+            <td>
+                (16 digits only)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Security Code (CVV)
+            </td>
+            <td>
+                <input type="text" pattern="[0-9]{3}" placeholder="Enter your security code" id="cvv"
+                    style="width:100%" />
+            </td>
+            <td>
+                (3 digits only)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <b>Expiry Date</b>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Month
+            </td>
+            <td>
+                <select name="expiryMonth" id="expmon" style="width:100%">
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Year
+            </td>
+            <td>
+                <select name="expiryYear" id="expyea" style="width:100%">
+                    <option value="20">2020</option>
+                    <option value="21">2021</option>
+                    <option value="22">2022</option>
+                    <option value="23">2023</option>
+                    <option value="24">2024</option>
+                    <option value="25">2025</option>
+                    <option value="26">2026</option>
+                    <option value="27">2027</option>
+                    <option value="28">2028</option>
+                    <option value="29">2029</option>
+                    <option value="30">2030</option>
+
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Transaction Amount / £
+            </td>
+            <td>
+            <td>
+                <input type="text" placeholder="0.00" id="amt" style="width:100%" />
+            </td>
+            <td>
+                (1 or more digits, no more than 2 decimal places, "." or "," seperator)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                MerchantID
+            </td>
+            <td>
+                <input type="text" placeholder="Enter the MerchantID" id="merID" style="width:100%" />
+            </td>
+            <td>
+                (GUID - unknown format - currently set to 1-50 alphanumeric characters)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Merchant Category Code
+            </td>
+            <td>
+                <input type="text" placeholder="Enter the merchant category code" id="merCC" style="width:100%" />
+            </td>
+            <td>
+                (4 digits only)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <b>Billing Address</b>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Street Address Line 1
+            </td>
+            <td>
+                <input type="text" placeholder="House number and street" id="str1" style="width:100%" />
+            </td>
+            <td>
+                (1-50 characters only)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Street Address Line 2 (Optional)
+            </td>
+            <td>
+                <input type="text" id="str2" style="width:100%" />
+            </td>
+            <td>
+                (0-50 characters only)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Town/City
+            </td>
+            <td>
+                <input type="text" placeholder="Enter your town" id="town" style="width:100%" />
+            </td>
+            <td>
+                (1-50 characters only)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                County (Optional)
+            </td>
+            <td>
+                <input type="text" placeholder="Enter your county" id="county" style="width:100%" />
+            </td>
+            <td>
+                (0-50 characters only)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Post Code
+            </td>
+            <td>
+                <input type="text" placeholder="Enter your postcode" id="postcode" style="width:100%" />
+            </td>
+            <td>
+                (5-8 alphanumeric characters only)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Country
+            </td>
+            <td>
+                <select id="country" style="width:100%">
+                    <option value="GB">UNITED KINGDOM</option>
+                    <option value="US">UNITED STATES</option>
+                    <option value="UM">UNITED STATES MINOR OUTLYING ISLANDS</option>
+                    <option value="UY">URUGUAY</option>
+                    <option value="UZ">UZBEKISTAN</option>
+                    <option value="VU">VANUATU</option>
+                    <option value="VE">VENEZUELA</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Timestamp
+            </td>
+            <td>
+                Added automatically on submit
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Country Code
+            </td>
+            <td>
+                <input type="text" placeholder="Enter your country code" id="countrycode" style="width:100%" />
+            </td>
+            <td>
+                (unknown format - currently set to 1-50 characters)
+            </td>
+        </tr>
+    </table>
+    <input type="button" value="Submit" onclick="submit1()">
+
+    <!--Output - This will display the POST response received-->
+    <div>
+        <hr class="rounded">
+        <b>OUTPUT</b>
+        <br />
+    </div>
+    <span>
+        <br />
+        Message received?
+    </span>
+    <span id="outputconfirmation">
+    </span>
+    <div>
+        <br />
+        Response Received:
+        <br />
+    </div>
+    <div id="outputdisplay">
+    </div>
+</body>
+
+</html>
